@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星邻 - 通讯录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; background: #f5f7fa; }
+        .letter-index { writing-mode: vertical-lr; text-orientation: upright; letter-spacing: 2px; }
+        .contact-item { transition: background 0.15s; }
+        .contact-item:hover { background: #f8fafc; }
+        .contact-item:active { transform: scale(0.995); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 顶部 -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+        <div class="max-w-2xl mx-auto px-4 py-3 text-center">
+            <h1 class="text-lg font-semibold text-gray-800">通讯录</h1>
+        </div>
+    </header>
+
+    <main class="max-w-2xl mx-auto pb-20">
+        <!-- 搜索 -->
+        <div class="px-4 py-3">
+            <div class="bg-white rounded-xl px-4 py-2.5 flex items-center gap-3 shadow-sm">
+                <i class="fas fa-search text-gray-400"></i>
+                <input type="text" placeholder="搜索联系人" class="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400">
+            </div>
+        </div>
+
+        <!-- 功能入口 -->
+        <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mb-3">
+            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <span class="flex-1 text-gray-700 font-medium">新的朋友</span>
+                <span class="w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">2</span>
+                <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
+            </a>
+            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span class="flex-1 text-gray-700 font-medium">群聊</span>
+                <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
+            </a>
+            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-500">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <span class="flex-1 text-gray-700 font-medium">标签</span>
+                <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
+            </a>
+        </div>
+
+        <!-- 联系人列表 -->
+        <div class="relative">
+            <!-- S -->
+            <div class="sticky top-14 z-10">
+                <div class="px-5 py-1.5 bg-gray-100 text-xs text-gray-500 font-medium">S</div>
+            </div>
+            <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mt-1">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=carol" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">王晓雯</span>
+                </div>
+                <div class="contact-item flex items-center gap-3 px-4 py-3 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=near3" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">孙涛</span>
+                </div>
+            </div>
+
+            <!-- L -->
+            <div class="sticky top-14 z-10 mt-3">
+                <div class="px-5 py-1.5 bg-gray-100 text-xs text-gray-500 font-medium">L</div>
+            </div>
+            <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mt-1">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=alice" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">林小雨</span>
+                </div>
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=near1" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">刘洋</span>
+                </div>
+                <div class="contact-item flex items-center gap-3 px-4 py-3 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=david" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">李大雄</span>
+                </div>
+            </div>
+
+            <!-- C -->
+            <div class="sticky top-14 z-10 mt-3">
+                <div class="px-5 py-1.5 bg-gray-100 text-xs text-gray-500 font-medium">C</div>
+            </div>
+            <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mt-1">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=bob" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">陈阿杰</span>
+                </div>
+                <div class="contact-item flex items-center gap-3 px-4 py-3 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user1" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">陈明</span>
+                </div>
+            </div>
+
+            <!-- Z -->
+            <div class="sticky top-14 z-10 mt-3">
+                <div class="px-5 py-1.5 bg-gray-100 text-xs text-gray-500 font-medium">Z</div>
+            </div>
+            <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mt-1">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user2" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">赵琳</span>
+                </div>
+                <div class="contact-item flex items-center gap-3 px-4 py-3 cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=frank" class="w-11 h-11 rounded-xl">
+                    <span class="text-gray-800">张伟</span>
+                </div>
+            </div>
+
+            <!-- 右侧字母索引 -->
+            <div class="fixed right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0.5 py-2 z-40">
+                <span class="text-[10px] text-gray-400 font-medium py-0.5">S</span>
+                <span class="text-[10px] text-gray-400 font-medium py-0.5">L</span>
+                <span class="text-[10px] text-gray-400 font-medium py-0.5">C</span>
+                <span class="text-[10px] text-gray-400 font-medium py-0.5">Z</span>
+            </div>
+        </div>
+
+        <div class="text-center py-6 text-gray-400 text-sm">12 位联系人</div>
+    </main>
+
+    <!-- 底部导航 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-50">
+        <div class="max-w-2xl mx-auto flex justify-around items-center py-2">
+            <a href="index.html" class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-compass text-xl"></i>
+                <span class="text-xs">首页</span>
+            </a>
+            <a href="discover.html" class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-compass text-xl"></i>
+                <span class="text-xs">发现</span>
+            </a>
+            <a href="chat.html" class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-comment-dots text-xl"></i>
+                <span class="text-xs">消息</span>
+            </a>
+            <a href="contacts.html" class="flex flex-col items-center gap-0.5 text-blue-600">
+                <i class="fas fa-address-book text-xl"></i>
+                <span class="text-xs">通讯录</span>
+            </a>
+            <a href="profile.html" class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-user text-xl"></i>
+                <span class="text-xs">我的</span>
+            </a>
+        </div>
+    </nav>
+</body>
+</html>
