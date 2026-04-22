@@ -11,13 +11,18 @@
         body { font-family: 'Noto Sans SC', sans-serif; background: #f5f7fa; }
         .friend-card { transition: all 0.2s; }
         .friend-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
-        .topic-tag { transition: all 0.2s; }
-        .topic-tag:hover { transform: scale(1.05); }
+        .topic-tag { transition: all 0.2s; cursor: pointer; }
+        .topic-tag:hover { transform: scale(1.05); background: #eef2ff; color: #4f46e5; }
+        .topic-tag.active { background: #4f46e5; color: white; }
+        .followed { background: #f3f4f6 !important; color: #6b7280 !important; }
+        .greeted { border-color: #d1d5db !important; color: #9ca3af !important; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="min-h-screen">
     <!-- 顶部 -->
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-2xl mx-auto px-4 py-3 text-center">
             <h1 class="text-lg font-semibold text-gray-800">发现</h1>
         </div>
@@ -28,7 +33,7 @@
         <div class="px-4 py-3">
             <div class="bg-white rounded-xl px-4 py-2.5 flex items-center gap-3 shadow-sm">
                 <i class="fas fa-search text-gray-400"></i>
-                <input type="text" placeholder="搜索用户、话题" class="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400">
+                <input type="text" id="search-input" placeholder="搜索用户、话题" class="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400" oninput="filterFriends(this.value)">
             </div>
         </div>
 
@@ -38,30 +43,30 @@
                 <h2 class="font-semibold text-gray-800">推荐好友</h2>
                 <a href="#" class="text-sm text-blue-500">查看更多</a>
             </div>
-            <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                <div class="friend-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 text-center shadow-sm">
+            <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide" id="friend-list">
+                <div class="friend-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 text-center shadow-sm" data-name="周明">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user1" class="w-14 h-14 rounded-full mx-auto object-cover">
                     <p class="font-medium text-gray-800 mt-2 text-sm">周明</p>
                     <p class="text-xs text-gray-400 mt-0.5">摄影师</p>
-                    <button class="mt-3 w-full py-1.5 rounded-full bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition">关注</button>
+                    <button class="follow-btn mt-3 w-full py-1.5 rounded-full bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition" onclick="toggleFollow(this)">关注</button>
                 </div>
-                <div class="friend-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 text-center shadow-sm">
+                <div class="friend-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 text-center shadow-sm" data-name="赵琳">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user2" class="w-14 h-14 rounded-full mx-auto object-cover">
                     <p class="font-medium text-gray-800 mt-2 text-sm">赵琳</p>
                     <p class="text-xs text-gray-400 mt-0.5">设计师</p>
-                    <button class="mt-3 w-full py-1.5 rounded-full bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition">关注</button>
+                    <button class="follow-btn mt-3 w-full py-1.5 rounded-full bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition" onclick="toggleFollow(this)">关注</button>
                 </div>
-                <div class="friend-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 text-center shadow-sm">
+                <div class="friend-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 text-center shadow-sm" data-name="孙涛">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user3" class="w-14 h-14 rounded-full mx-auto object-cover">
                     <p class="font-medium text-gray-800 mt-2 text-sm">孙涛</p>
                     <p class="text-xs text-gray-400 mt-0.5">音乐人</p>
-                    <button class="mt-3 w-full py-1.5 rounded-full bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition">关注</button>
+                    <button class="follow-btn mt-3 w-full py-1.5 rounded-full bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition" onclick="toggleFollow(this)">关注</button>
                 </div>
-                <div class="friend-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 text-center shadow-sm">
+                <div class="friend-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 text-center shadow-sm" data-name="吴悦">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user4" class="w-14 h-14 rounded-full mx-auto object-cover">
                     <p class="font-medium text-gray-800 mt-2 text-sm">吴悦</p>
                     <p class="text-xs text-gray-400 mt-0.5">美食博主</p>
-                    <button class="mt-3 w-full py-1.5 rounded-full bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition">关注</button>
+                    <button class="follow-btn mt-3 w-full py-1.5 rounded-full bg-blue-500 text-white text-xs font-medium hover:bg-blue-600 transition" onclick="toggleFollow(this)">关注</button>
                 </div>
             </div>
         </section>
@@ -69,43 +74,43 @@
         <!-- 热门话题 -->
         <section class="px-4 mt-6">
             <h2 class="font-semibold text-gray-800 mb-3">热门话题</h2>
-            <div class="flex flex-wrap gap-2">
-                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm cursor-pointer">#春日摄影大赛</span>
-                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm cursor-pointer">#周末去哪儿</span>
-                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm cursor-pointer">#美食探店</span>
-                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm cursor-pointer">#健身打卡</span>
-                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm cursor-pointer">#读书笔记</span>
-                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm cursor-pointer">#萌宠日常</span>
+            <div class="flex flex-wrap gap-2" id="topic-list">
+                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm" onclick="toggleTopic(this)">#春日摄影大赛</span>
+                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm" onclick="toggleTopic(this)">#周末去哪儿</span>
+                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm" onclick="toggleTopic(this)">#美食探店</span>
+                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm" onclick="toggleTopic(this)">#健身打卡</span>
+                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm" onclick="toggleTopic(this)">#读书笔记</span>
+                <span class="topic-tag px-4 py-2 bg-white rounded-full text-sm text-gray-700 shadow-sm" onclick="toggleTopic(this)">#萌宠日常</span>
             </div>
         </section>
 
         <!-- 附近的人 -->
         <section class="px-4 mt-6">
             <h2 class="font-semibold text-gray-800 mb-3">附近的人</h2>
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-4 py-3.5 border-b border-gray-50">
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden" id="nearby-list">
+                <div class="nearby-item flex items-center gap-3 px-4 py-3.5 border-b border-gray-50">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=near1" class="w-11 h-11 rounded-xl">
                     <div class="flex-1">
                         <h3 class="font-medium text-gray-800">刘洋</h3>
                         <p class="text-xs text-gray-400">距离 200m · 刚刚活跃</p>
                     </div>
-                    <button class="px-4 py-1.5 rounded-full border border-blue-500 text-blue-500 text-xs hover:bg-blue-50 transition">打招呼</button>
+                    <button class="greet-btn px-4 py-1.5 rounded-full border border-blue-500 text-blue-500 text-xs hover:bg-blue-50 transition" onclick="toggleGreet(this)">打招呼</button>
                 </div>
-                <div class="flex items-center gap-3 px-4 py-3.5 border-b border-gray-50">
+                <div class="nearby-item flex items-center gap-3 px-4 py-3.5 border-b border-gray-50">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=near2" class="w-11 h-11 rounded-xl">
                     <div class="flex-1">
                         <h3 class="font-medium text-gray-800">郑雪</h3>
                         <p class="text-xs text-gray-400">距离 500m · 5分钟前</p>
                     </div>
-                    <button class="px-4 py-1.5 rounded-full border border-blue-500 text-blue-500 text-xs hover:bg-blue-50 transition">打招呼</button>
+                    <button class="greet-btn px-4 py-1.5 rounded-full border border-blue-500 text-blue-500 text-xs hover:bg-blue-50 transition" onclick="toggleGreet(this)">打招呼</button>
                 </div>
-                <div class="flex items-center gap-3 px-4 py-3.5">
+                <div class="nearby-item flex items-center gap-3 px-4 py-3.5">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=near3" class="w-11 h-11 rounded-xl">
                     <div class="flex-1">
                         <h3 class="font-medium text-gray-800">黄磊</h3>
                         <p class="text-xs text-gray-400">距离 1km · 10分钟前</p>
                     </div>
-                    <button class="px-4 py-1.5 rounded-full border border-blue-500 text-blue-500 text-xs hover:bg-blue-50 transition">打招呼</button>
+                    <button class="greet-btn px-4 py-1.5 rounded-full border border-blue-500 text-blue-500 text-xs hover:bg-blue-50 transition" onclick="toggleGreet(this)">打招呼</button>
                 </div>
             </div>
         </section>
@@ -113,31 +118,36 @@
         <!-- 精选照片 -->
         <section class="px-4 mt-6 mb-4">
             <h2 class="font-semibold text-gray-800 mb-3">精选照片</h2>
-            <div class="grid grid-cols-3 gap-2">
-                <div class="aspect-square rounded-xl overflow-hidden">
+            <div class="grid grid-cols-3 gap-2" id="photo-grid">
+                <div class="aspect-square rounded-xl overflow-hidden cursor-pointer" onclick="viewPhoto(this)">
                     <img src="https://picsum.photos/seed/discover1/200/200" class="w-full h-full object-cover hover:scale-110 transition duration-300">
                 </div>
-                <div class="aspect-square rounded-xl overflow-hidden">
+                <div class="aspect-square rounded-xl overflow-hidden cursor-pointer" onclick="viewPhoto(this)">
                     <img src="https://picsum.photos/seed/discover2/200/200" class="w-full h-full object-cover hover:scale-110 transition duration-300">
                 </div>
-                <div class="aspect-square rounded-xl overflow-hidden">
+                <div class="aspect-square rounded-xl overflow-hidden cursor-pointer" onclick="viewPhoto(this)">
                     <img src="https://picsum.photos/seed/discover3/200/200" class="w-full h-full object-cover hover:scale-110 transition duration-300">
                 </div>
-                <div class="aspect-square rounded-xl overflow-hidden">
+                <div class="aspect-square rounded-xl overflow-hidden cursor-pointer" onclick="viewPhoto(this)">
                     <img src="https://picsum.photos/seed/discover4/200/200" class="w-full h-full object-cover hover:scale-110 transition duration-300">
                 </div>
-                <div class="aspect-square rounded-xl overflow-hidden">
+                <div class="aspect-square rounded-xl overflow-hidden cursor-pointer" onclick="viewPhoto(this)">
                     <img src="https://picsum.photos/seed/discover5/200/200" class="w-full h-full object-cover hover:scale-110 transition duration-300">
                 </div>
-                <div class="aspect-square rounded-xl overflow-hidden">
+                <div class="aspect-square rounded-xl overflow-hidden cursor-pointer" onclick="viewPhoto(this)">
                     <img src="https://picsum.photos/seed/discover6/200/200" class="w-full h-full object-cover hover:scale-110 transition duration-300">
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- 大图查看模态框 -->
+    <div id="photo-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90" onclick="closePhoto()">
+        <img id="photo-large" src="" class="max-w-[90vw] max-h-[80vh] object-contain">
+    </div>
+
     <!-- 底部导航 -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-40">
         <div class="max-w-2xl mx-auto flex justify-around items-center py-2">
             <a href="index.html" class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-gray-600">
                 <i class="fas fa-compass text-xl"></i>
@@ -161,5 +171,52 @@
             </a>
         </div>
     </nav>
+
+    <script>
+        function toggleFollow(btn) {
+            if (btn.classList.contains('followed')) {
+                btn.classList.remove('followed');
+                btn.textContent = '关注';
+            } else {
+                btn.classList.add('followed');
+                btn.textContent = '已关注';
+            }
+        }
+        function toggleGreet(btn) {
+            if (btn.classList.contains('greeted')) return;
+            btn.classList.add('greeted');
+            btn.textContent = '已发送';
+            // 模拟跳转到聊天
+            setTimeout(() => {
+                if (confirm('已发送打招呼，是否前往聊天？')) {
+                    window.location.href = 'chat-detail.html?user=near1&name=刘洋';
+                }
+            }, 300);
+        }
+        function toggleTopic(tag) {
+            tag.classList.toggle('active');
+        }
+        function filterFriends(val) {
+            const cards = document.querySelectorAll('.friend-card');
+            const nearby = document.querySelectorAll('.nearby-item');
+            const v = val.toLowerCase();
+            cards.forEach(c => {
+                const name = c.dataset.name.toLowerCase();
+                c.style.display = name.includes(v) ? '' : 'none';
+            });
+            nearby.forEach(n => {
+                const name = n.querySelector('h3').textContent.toLowerCase();
+                n.style.display = name.includes(v) ? '' : 'none';
+            });
+        }
+        function viewPhoto(el) {
+            const img = el.querySelector('img');
+            document.getElementById('photo-large').src = img.src.replace('/200/200', '/600/600');
+            document.getElementById('photo-modal').classList.remove('hidden');
+        }
+        function closePhoto() {
+            document.getElementById('photo-modal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
