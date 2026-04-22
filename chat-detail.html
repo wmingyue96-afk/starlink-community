@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星邻 - 聊天</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; background: #f5f7fa; }
+        .msg-left .bubble { background: white; border-radius: 18px 18px 18px 4px; }
+        .msg-right .bubble { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 18px 18px 4px 18px; }
+        .msg-enter { animation: msgIn 0.25s ease; }
+        @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- 顶部 -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100">
+        <div class="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+            <a href="chat.html" class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <img id="chat-avatar" src="" class="w-9 h-9 rounded-xl">
+            <div class="flex-1">
+                <h2 id="chat-name" class="font-semibold text-gray-800 text-sm">加载中...</h2>
+                <p class="text-xs text-green-500">在线</p>
+            </div>
+            <button class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                <i class="fas fa-phone"></i>
+            </button>
+            <button class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 消息列表 -->
+    <main id="msg-list" class="flex-1 max-w-2xl mx-auto w-full px-4 py-4 space-y-4 overflow-y-auto">
+        <!-- 消息由JS渲染 -->
+    </main>
+
+    <!-- 输入区 -->
+    <footer class="bg-white border-t border-gray-100 sticky bottom-0 z-40">
+        <div class="max-w-2xl mx-auto px-4 py-3 flex items-end gap-3">
+            <button class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition flex-shrink-0">
+                <i class="fas fa-plus"></i>
+            </button>
+            <div class="flex-1 bg-gray-100 rounded-2xl px-4 py-2.5 flex items-end gap-2">
+                <textarea id="msg-input" placeholder="输入消息..." class="flex-1 bg-transparent outline-none text-sm text-gray-700 resize-none max-h-24" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+                <button onclick="document.getElementById('chat-file').click()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-image"></i>
+                </button>
+                <input type="file" id="chat-file" accept="image/*" class="hidden" onchange="sendImage(event)">
+            </div>
+            <button onclick="sendMsg()" class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white hover:bg-blue-600 transition flex-shrink-0">
+                <i class="fas fa-paper-plane text-sm"></i>
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        // 解析URL参数
+        const params = new URLSearchParams(location.search);
+        const userSeed = params.get('user') || 'alice';
+        const userName = params.get('name') || '林小雨';
+        const userAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userSeed}`;
+
+        document.getElementById('chat-avatar').src = userAvatar;
+        document.getElementById('chat-name').textContent = userName;
+        document.title = `星邻 - ${userName}`;
+
+        // 预设消息
+        const presetMessages = {
+            'alice': [
+                { type: 'receive', text: '嗨！最近怎么样？' },
+                { type: 'send', text: '挺好的，最近在忙一个新项目' },
+                { type: 'receive', text: '听起来不错！周末一起去喝咖啡吗？' }
+            ],
+            'bob': [
+                { type: 'receive', text: '今天去健身房吗？' },
+                { type: 'send', text: '去！几点？' },
+                { type: 'receive', text: '晚上7点，老地方见' }
+            ],
+            'carol': [
+                { type: 'receive', text: '你看这张照片怎么样' },
+                { type: 'receive', text: 'https://picsum.photos/seed/photo1/300/300', isImage: true }
+            ],
+            'david': [
+                { type: 'receive', text: '项目进度怎么样了？' }
+            ],
+            'eve': [
+                { type: 'receive', text: '新的方案已经上传了' },
+                { type: 'receive', text: '大家看一下有没有问题' }
+            ],
+            'frank': [
+                { type: 'receive', text: '收到，谢谢！' }
+            ]
+        };
+
+        let messages = presetMessages[userSeed] || [{ type: 'receive', text: '你好！' }];
+
+        function renderMessages() {
+            const list = document.getElementById('msg-list');
+            list.innerHTML = '';
+            messages.forEach((msg, idx) => {
+                const isMe = msg.type === 'send';
+                const align = isMe ? 'justify-end' : 'justify-start';
+                const msgClass = isMe ? 'msg-right' : 'msg-left';
+                const avatar = isMe
+                    ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=myself'
+                    : userAvatar;
+
+                let content = '';
+                if (msg.isImage) {
+                    content = `<img src="${msg.text}" class="max-w-[200px] rounded-xl cursor-pointer">`;
+                } else {
+                    content = `<p class="text-sm leading-relaxed">${msg.text}</p>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = `flex ${align} gap-2 msg-enter`;
+                div.style.animationDelay = `${idx * 0.05}s`;
+                if (isMe) {
+                    div.innerHTML = `
+                        <div class="${msgClass} max-w-[70%]">
+                            <div class="bubble px-4 py-2.5 shadow-sm">${content}</div>
+                        </div>
+                        <img src="${avatar}" class="w-8 h-8 rounded-xl flex-shrink-0">
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <img src="${avatar}" class="w-8 h-8 rounded-xl flex-shrink-0">
+                        <div class="${msgClass} max-w-[70%]">
+                            <div class="bubble px-4 py-2.5 shadow-sm">${content}</div>
+                        </div>
+                    `;
+                }
+                list.appendChild(div);
+            });
+            // 滚动到底部
+            list.scrollTop = list.scrollHeight;
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text) return;
+            messages.push({ type: 'send', text });
+            input.value = '';
+            input.style.height = 'auto';
+            renderMessages();
+            // 模拟对方回复
+            setTimeout(() => {
+                const replies = ['收到！', '哈哈好的', '嗯嗯', '稍等我看一下', '没问题', '赞！'];
+                messages.push({ type: 'receive', text: replies[Math.floor(Math.random() * replies.length)] });
+                renderMessages();
+            }, 1000 + Math.random() * 2000);
+        }
+
+        function sendImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                messages.push({ type: 'send', text: e.target.result, isImage: true });
+                renderMessages();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        renderMessages();
+    </script>
+</body>
+</html>
