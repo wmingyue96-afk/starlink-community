@@ -12,11 +12,28 @@
         .profile-cover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .stat-card { transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-2px); }
+        .modal-overlay { animation: fadeIn 0.2s ease; }
+        .modal-box { animation: slideUp 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .dark-mode { background: #111827 !important; }
+        .dark-mode .bg-white { background: #1f2937 !important; }
+        .dark-mode .text-gray-800 { color: #f3f4f6 !important; }
+        .dark-mode .text-gray-700 { color: #d1d5db !important; }
+        .dark-mode .text-gray-600 { color: #9ca3af !important; }
+        .dark-mode .text-gray-500 { color: #9ca3af !important; }
+        .dark-mode .text-gray-400 { color: #6b7280 !important; }
+        .dark-mode .border-gray-100 { border-color: #374151 !important; }
+        .dark-mode .border-gray-50 { border-color: #374151 !important; }
+        .dark-mode .bg-gray-50 { background: #374151 !important; }
+        .dark-mode .bg-gray-100 { background: #374151 !important; }
+        .dark-mode header { background: rgba(17,24,39,0.8) !important; }
+        .dark-mode nav { background: rgba(17,24,39,0.9) !important; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen" id="app-body">
     <!-- 顶部 -->
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-2xl mx-auto px-4 py-3 text-center">
             <h1 class="text-lg font-semibold text-gray-800">我的</h1>
         </div>
@@ -27,9 +44,10 @@
         <div class="relative">
             <div class="profile-cover h-40 mx-2 mt-2 rounded-2xl"></div>
             <div class="absolute -bottom-10 left-6">
-                <div class="w-20 h-20 rounded-2xl border-4 border-white overflow-hidden shadow-lg">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=myself" class="w-full h-full object-cover bg-white">
+                <div class="w-20 h-20 rounded-2xl border-4 border-white overflow-hidden shadow-lg cursor-pointer" onclick="changeAvatar()">
+                    <img id="avatar-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=myself" class="w-full h-full object-cover bg-white">
                 </div>
+                <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="previewAvatar(event)">
             </div>
             <div class="absolute top-4 right-6">
                 <button class="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white hover:bg-white/30 transition">
@@ -42,31 +60,31 @@
         <div class="mt-12 px-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">我的昵称</h2>
+                    <h2 id="profile-name" class="text-xl font-bold text-gray-800">我的昵称</h2>
                     <p class="text-sm text-gray-400 mt-0.5">ID: starlink_9527</p>
                 </div>
-                <button class="px-4 py-1.5 rounded-full border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">
+                <button onclick="openEditModal()" class="px-4 py-1.5 rounded-full border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition">
                     编辑资料
                 </button>
             </div>
-            <p class="text-gray-600 mt-3 text-sm leading-relaxed">热爱生活，喜欢摄影和旅行。记录每一个美好瞬间。</p>
+            <p id="profile-bio" class="text-gray-600 mt-3 text-sm leading-relaxed">热爱生活，喜欢摄影和旅行。记录每一个美好瞬间。</p>
         </div>
 
         <!-- 数据卡片 -->
         <div class="grid grid-cols-4 gap-3 mx-4 mt-6">
-            <div class="stat-card bg-white rounded-xl p-3 text-center shadow-sm">
+            <div class="stat-card bg-white rounded-xl p-3 text-center shadow-sm cursor-pointer" onclick="showToast('我的动态')">
                 <p class="text-lg font-bold text-gray-800">128</p>
                 <p class="text-xs text-gray-400 mt-0.5">动态</p>
             </div>
-            <div class="stat-card bg-white rounded-xl p-3 text-center shadow-sm">
+            <div class="stat-card bg-white rounded-xl p-3 text-center shadow-sm cursor-pointer" onclick="showToast('我的关注')">
                 <p class="text-lg font-bold text-gray-800">356</p>
                 <p class="text-xs text-gray-400 mt-0.5">关注</p>
             </div>
-            <div class="stat-card bg-white rounded-xl p-3 text-center shadow-sm">
+            <div class="stat-card bg-white rounded-xl p-3 text-center shadow-sm cursor-pointer" onclick="showToast('我的粉丝')">
                 <p class="text-lg font-bold text-gray-800">1.2k</p>
                 <p class="text-xs text-gray-400 mt-0.5">粉丝</p>
             </div>
-            <div class="stat-card bg-white rounded-xl p-3 text-center shadow-sm">
+            <div class="stat-card bg-white rounded-xl p-3 text-center shadow-sm cursor-pointer" onclick="showToast('获赞总数')">
                 <p class="text-lg font-bold text-gray-800">89</p>
                 <p class="text-xs text-gray-400 mt-0.5">获赞</p>
             </div>
@@ -74,28 +92,28 @@
 
         <!-- 功能列表 -->
         <div class="mx-4 mt-4 bg-white rounded-2xl shadow-sm overflow-hidden">
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50">
+            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50" onclick="showToast('我的喜欢')">
                 <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
                     <i class="fas fa-heart"></i>
                 </div>
                 <span class="flex-1 text-gray-700">我的喜欢</span>
                 <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
             </a>
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50">
+            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50" onclick="showToast('我的相册')">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
                     <i class="fas fa-image"></i>
                 </div>
                 <span class="flex-1 text-gray-700">我的相册</span>
                 <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
             </a>
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50">
+            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50" onclick="showToast('我的收藏')">
                 <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
                     <i class="fas fa-bookmark"></i>
                 </div>
                 <span class="flex-1 text-gray-700">我的收藏</span>
                 <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
             </a>
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
+            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition" onclick="showToast('浏览记录')">
                 <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-500">
                     <i class="fas fa-clock"></i>
                 </div>
@@ -106,34 +124,34 @@
 
         <!-- 设置 -->
         <div class="mx-4 mt-4 bg-white rounded-2xl shadow-sm overflow-hidden">
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50">
+            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50" onclick="showToast('设置')">
                 <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500">
                     <i class="fas fa-cog"></i>
                 </div>
                 <span class="flex-1 text-gray-700">设置</span>
                 <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
             </a>
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
+            <div class="flex items-center gap-4 px-5 py-4">
                 <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500">
                     <i class="fas fa-moon"></i>
                 </div>
                 <span class="flex-1 text-gray-700">深色模式</span>
-                <div class="w-11 h-6 bg-gray-200 rounded-full relative cursor-pointer">
-                    <div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 shadow-sm"></div>
-                </div>
-            </a>
+                <button onclick="toggleDarkMode()" class="w-12 h-7 rounded-full bg-gray-200 relative transition-colors duration-300" id="dark-toggle">
+                    <div class="w-5 h-5 bg-white rounded-full absolute top-1 left-1 shadow-sm transition-transform duration-300" id="dark-knob"></div>
+                </button>
+            </div>
         </div>
 
         <!-- 退出 -->
         <div class="mx-4 mt-4 mb-4">
-            <button class="w-full py-3 bg-white rounded-2xl text-red-500 font-medium shadow-sm hover:bg-red-50 transition">
+            <button onclick="logout()" class="w-full py-3 bg-white rounded-2xl text-red-500 font-medium shadow-sm hover:bg-red-50 transition">
                 退出登录
             </button>
         </div>
     </main>
 
     <!-- 底部导航 -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-40">
         <div class="max-w-2xl mx-auto flex justify-around items-center py-2">
             <a href="index.html" class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-gray-600">
                 <i class="fas fa-compass text-xl"></i>
@@ -157,5 +175,96 @@
             </a>
         </div>
     </nav>
+
+    <!-- 编辑资料模态框 -->
+    <div id="edit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="modal-overlay absolute inset-0 bg-black/50" onclick="closeEditModal()"></div>
+        <div class="modal-box relative bg-white w-full max-w-sm mx-4 rounded-2xl p-6 shadow-xl">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">编辑资料</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">昵称</label>
+                    <input type="text" id="edit-name" value="我的昵称" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">个性签名</label>
+                    <textarea id="edit-bio" rows="3" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-gray-800 outline-none resize-none focus:ring-2 focus:ring-blue-500/20">热爱生活，喜欢摄影和旅行。记录每一个美好瞬间。</textarea>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeEditModal()" class="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition">取消</button>
+                <button onclick="saveProfile()" class="flex-1 py-3 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full text-sm opacity-0 pointer-events-none transition-opacity duration-300 z-50 shadow-lg"></div>
+
+    <script>
+        let isDark = false;
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+        }
+
+        function openEditModal() {
+            document.getElementById('edit-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        function saveProfile() {
+            const name = document.getElementById('edit-name').value.trim();
+            const bio = document.getElementById('edit-bio').value.trim();
+            if (name) document.getElementById('profile-name').textContent = name;
+            if (bio) document.getElementById('profile-bio').textContent = bio;
+            closeEditModal();
+            showToast('资料已更新');
+        }
+
+        function changeAvatar() {
+            document.getElementById('avatar-input').click();
+        }
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('avatar-img').src = e.target.result;
+                showToast('头像已更新');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function toggleDarkMode() {
+            isDark = !isDark;
+            const toggle = document.getElementById('dark-toggle');
+            const knob = document.getElementById('dark-knob');
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                toggle.classList.remove('bg-gray-200');
+                toggle.classList.add('bg-blue-500');
+                knob.style.transform = 'translateX(20px)';
+            } else {
+                document.body.classList.remove('dark-mode');
+                toggle.classList.add('bg-gray-200');
+                toggle.classList.remove('bg-blue-500');
+                knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                showToast('已退出登录');
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+    </script>
 </body>
 </html>
