@@ -9,15 +9,14 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Noto Sans SC', sans-serif; background: #f5f7fa; }
-        .letter-index { writing-mode: vertical-lr; text-orientation: upright; letter-spacing: 2px; }
-        .contact-item { transition: background 0.15s; }
+        .contact-item { transition: background 0.15s; cursor: pointer; }
         .contact-item:hover { background: #f8fafc; }
         .contact-item:active { transform: scale(0.995); }
     </style>
 </head>
 <body class="min-h-screen">
     <!-- 顶部 -->
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-2xl mx-auto px-4 py-3 text-center">
             <h1 class="text-lg font-semibold text-gray-800">通讯录</h1>
         </div>
@@ -28,13 +27,13 @@
         <div class="px-4 py-3">
             <div class="bg-white rounded-xl px-4 py-2.5 flex items-center gap-3 shadow-sm">
                 <i class="fas fa-search text-gray-400"></i>
-                <input type="text" placeholder="搜索联系人" class="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400">
+                <input type="text" id="search-input" placeholder="搜索联系人" class="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400" oninput="filterContacts(this.value)">
             </div>
         </div>
 
         <!-- 功能入口 -->
         <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mb-3">
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50">
+            <a href="#" class="func-item flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50" onclick="showToast('新的朋友')">
                 <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
                     <i class="fas fa-user-plus"></i>
                 </div>
@@ -42,14 +41,14 @@
                 <span class="w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">2</span>
                 <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
             </a>
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50">
+            <a href="#" class="func-item flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition border-b border-gray-50" onclick="showToast('群聊')">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
                     <i class="fas fa-users"></i>
                 </div>
                 <span class="flex-1 text-gray-700 font-medium">群聊</span>
                 <i class="fas fa-chevron-right text-gray-300 text-sm"></i>
             </a>
-            <a href="#" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
+            <a href="#" class="func-item flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition" onclick="showToast('标签')">
                 <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-500">
                     <i class="fas fa-tags"></i>
                 </div>
@@ -59,18 +58,18 @@
         </div>
 
         <!-- 联系人列表 -->
-        <div class="relative">
+        <div class="relative" id="contacts-container">
             <!-- S -->
             <div class="sticky top-14 z-10">
                 <div class="px-5 py-1.5 bg-gray-100 text-xs text-gray-500 font-medium">S</div>
             </div>
             <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mt-1">
-                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50" onclick="goChat('carol','王晓雯')">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=carol" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">王晓雯</span>
                 </div>
-                <div class="contact-item flex items-center gap-3 px-4 py-3 cursor-pointer">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=near3" class="w-11 h-11 rounded-xl">
+                <div class="contact-item flex items-center gap-3 px-4 py-3" onclick="goChat('user3','孙涛')">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user3" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">孙涛</span>
                 </div>
             </div>
@@ -80,15 +79,15 @@
                 <div class="px-5 py-1.5 bg-gray-100 text-xs text-gray-500 font-medium">L</div>
             </div>
             <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mt-1">
-                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50" onclick="goChat('alice','林小雨')">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=alice" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">林小雨</span>
                 </div>
-                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50" onclick="goChat('near1','刘洋')">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=near1" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">刘洋</span>
                 </div>
-                <div class="contact-item flex items-center gap-3 px-4 py-3 cursor-pointer">
+                <div class="contact-item flex items-center gap-3 px-4 py-3" onclick="goChat('david','李大雄')">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=david" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">李大雄</span>
                 </div>
@@ -99,11 +98,11 @@
                 <div class="px-5 py-1.5 bg-gray-100 text-xs text-gray-500 font-medium">C</div>
             </div>
             <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mt-1">
-                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50" onclick="goChat('bob','陈阿杰')">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=bob" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">陈阿杰</span>
                 </div>
-                <div class="contact-item flex items-center gap-3 px-4 py-3 cursor-pointer">
+                <div class="contact-item flex items-center gap-3 px-4 py-3" onclick="goChat('user1','陈明')">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user1" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">陈明</span>
                 </div>
@@ -114,30 +113,30 @@
                 <div class="px-5 py-1.5 bg-gray-100 text-xs text-gray-500 font-medium">Z</div>
             </div>
             <div class="mx-2 bg-white rounded-2xl shadow-sm overflow-hidden mt-1">
-                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer">
+                <div class="contact-item flex items-center gap-3 px-4 py-3 border-b border-gray-50" onclick="goChat('user2','赵琳')">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user2" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">赵琳</span>
                 </div>
-                <div class="contact-item flex items-center gap-3 px-4 py-3 cursor-pointer">
+                <div class="contact-item flex items-center gap-3 px-4 py-3" onclick="goChat('frank','张伟')">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=frank" class="w-11 h-11 rounded-xl">
                     <span class="text-gray-800">张伟</span>
                 </div>
             </div>
 
             <!-- 右侧字母索引 -->
-            <div class="fixed right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0.5 py-2 z-40">
-                <span class="text-[10px] text-gray-400 font-medium py-0.5">S</span>
-                <span class="text-[10px] text-gray-400 font-medium py-0.5">L</span>
-                <span class="text-[10px] text-gray-400 font-medium py-0.5">C</span>
-                <span class="text-[10px] text-gray-400 font-medium py-0.5">Z</span>
+            <div class="fixed right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0.5 py-2 z-30 bg-white/80 backdrop-blur rounded-full px-1 shadow-sm">
+                <a href="#" class="text-[10px] text-blue-500 font-bold py-0.5" onclick="scrollToLetter('S',event)">S</a>
+                <a href="#" class="text-[10px] text-gray-400 font-medium py-0.5" onclick="scrollToLetter('L',event)">L</a>
+                <a href="#" class="text-[10px] text-gray-400 font-medium py-0.5" onclick="scrollToLetter('C',event)">C</a>
+                <a href="#" class="text-[10px] text-gray-400 font-medium py-0.5" onclick="scrollToLetter('Z',event)">Z</a>
             </div>
         </div>
 
-        <div class="text-center py-6 text-gray-400 text-sm">12 位联系人</div>
+        <div class="text-center py-6 text-gray-400 text-sm" id="contact-count">12 位联系人</div>
     </main>
 
     <!-- 底部导航 -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-40">
         <div class="max-w-2xl mx-auto flex justify-around items-center py-2">
             <a href="index.html" class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-gray-600">
                 <i class="fas fa-compass text-xl"></i>
@@ -161,5 +160,42 @@
             </a>
         </div>
     </nav>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full text-sm opacity-0 pointer-events-none transition-opacity duration-300 z-50 shadow-lg"></div>
+
+    <script>
+        function goChat(user, name) {
+            window.location.href = `chat-detail.html?user=${user}&name=${encodeURIComponent(name)}`;
+        }
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text + ' 功能开发中';
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+        }
+        function filterContacts(val) {
+            const items = document.querySelectorAll('.contact-item');
+            const v = val.toLowerCase();
+            let visible = 0;
+            items.forEach(item => {
+                const name = item.querySelector('span').textContent.toLowerCase();
+                const show = name.includes(v);
+                item.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            document.getElementById('contact-count').textContent = visible + ' 位联系人';
+        }
+        function scrollToLetter(letter, e) {
+            e.preventDefault();
+            const headers = document.querySelectorAll('.sticky');
+            for (const h of headers) {
+                if (h.textContent.trim() === letter) {
+                    h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    break;
+                }
+            }
+        }
+    </script>
 </body>
 </html>
