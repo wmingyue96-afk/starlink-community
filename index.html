@@ -14,17 +14,24 @@
         .post-card { transition: all 0.2s ease; }
         .post-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
         .like-btn.liked { color: #ef4444; }
-        .tab-active { color: #1f2937; border-bottom: 2px solid #667eea; }
-        .tab-inactive { color: #9ca3af; }
+        .modal-overlay { animation: fadeIn 0.2s ease; }
+        .modal-content { animation: slideUp 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; position: relative; }
+        .comment-box { animation: slideDown 0.2s ease; }
+        @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 300px; } }
     </style>
 </head>
 <body class="min-h-screen">
     <!-- 顶部导航 -->
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
             <h1 class="text-xl font-bold text-gray-800">星邻</h1>
-            <div class="flex items-center gap-4">
-                <button class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSearch()" class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
                     <i class="fas fa-search"></i>
                 </button>
                 <button class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition relative">
@@ -33,13 +40,21 @@
                 </button>
             </div>
         </div>
+        <!-- 搜索框 -->
+        <div id="search-bar" class="hidden px-4 pb-3 max-w-2xl mx-auto">
+            <div class="bg-gray-100 rounded-xl px-4 py-2 flex items-center gap-3">
+                <i class="fas fa-search text-gray-400"></i>
+                <input type="text" id="search-input" placeholder="搜索动态内容..." class="flex-1 bg-transparent outline-none text-sm" oninput="doSearch(this.value)">
+                <button onclick="toggleSearch()" class="text-gray-400 text-sm">取消</button>
+            </div>
+        </div>
     </header>
 
     <main class="max-w-2xl mx-auto pb-20">
         <!-- 故事栏 -->
         <section class="bg-white mt-3 rounded-2xl mx-2 p-4 shadow-sm">
-            <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                <div class="flex-shrink-0 text-center">
+            <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide" id="story-list">
+                <div class="flex-shrink-0 text-center cursor-pointer" onclick="openStory('myself','我的故事')">
                     <div class="relative w-16 h-16 mx-auto">
                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=myself" class="w-full h-full rounded-full object-cover">
                         <div class="absolute bottom-0 right-0 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs border-2 border-white">
@@ -48,163 +63,41 @@
                     </div>
                     <p class="text-xs text-gray-500 mt-1">我的故事</p>
                 </div>
-                <div class="flex-shrink-0 text-center">
-                    <div class="story-ring w-16 h-16 mx-auto">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=alice" class="w-full h-full rounded-full object-cover border-2 border-white">
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">小雨</p>
-                </div>
-                <div class="flex-shrink-0 text-center">
-                    <div class="story-ring w-16 h-16 mx-auto">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=bob" class="w-full h-full rounded-full object-cover border-2 border-white">
-                    </div>
-                    <p class="text-xs text-gray-600 mt-1">阿杰</p>
-                </div>
-                <div class="flex-shrink-0 text-center">
-                    <div class="story-ring-viewed w-16 h-16 mx-auto">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=carol" class="w-full h-full rounded-full object-cover border-2 border-white">
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">晓雯</p>
-                </div>
-                <div class="flex-shrink-0 text-center">
-                    <div class="story-ring-viewed w-16 h-16 mx-auto">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=david" class="w-full h-full rounded-full object-cover border-2 border-white">
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">大雄</p>
-                </div>
             </div>
         </section>
 
         <!-- 发布框 -->
         <section class="bg-white mt-3 rounded-2xl mx-2 p-4 shadow-sm">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="openPostModal()">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=myself" class="w-10 h-10 rounded-full">
-                <div class="flex-1 bg-gray-50 rounded-full px-4 py-2.5 text-gray-400 text-sm cursor-pointer hover:bg-gray-100 transition">
+                <div class="flex-1 bg-gray-50 rounded-full px-4 py-2.5 text-gray-400 text-sm hover:bg-gray-100 transition">
                     分享你的新鲜事...
                 </div>
             </div>
             <div class="flex justify-around mt-4 pt-3 border-t border-gray-50">
-                <button class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition text-sm">
+                <button onclick="openPostModal('image')" class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition text-sm">
                     <i class="fas fa-image text-green-500"></i> 图片
                 </button>
-                <button class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition text-sm">
+                <button onclick="openPostModal('video')" class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition text-sm">
                     <i class="fas fa-video text-red-500"></i> 视频
                 </button>
-                <button class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition text-sm">
+                <button onclick="openPostModal('location')" class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition text-sm">
                     <i class="fas fa-map-marker-alt text-orange-500"></i> 位置
                 </button>
             </div>
         </section>
 
         <!-- 动态列表 -->
-        <div id="feed-list" class="mt-3 space-y-3 mx-2">
-            <!-- 动态1 -->
-            <article class="post-card bg-white rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=alice" class="w-11 h-11 rounded-full">
-                        <div>
-                            <h3 class="font-semibold text-gray-800">林小雨</h3>
-                            <p class="text-xs text-gray-400">2小时前 · 上海</p>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-gray-600"><i class="fas fa-ellipsis-h"></i></button>
-                </div>
-                <p class="mt-3 text-gray-700 leading-relaxed">周末去看了樱花，真的太美了！春天的气息扑面而来，忍不住拍了好多照片。大家周末都去哪儿玩了？</p>
-                <div class="grid grid-cols-3 gap-1.5 mt-3 rounded-xl overflow-hidden">
-                    <img src="https://picsum.photos/seed/sakura1/300/300" class="w-full aspect-square object-cover">
-                    <img src="https://picsum.photos/seed/sakura2/300/300" class="w-full aspect-square object-cover">
-                    <img src="https://picsum.photos/seed/sakura3/300/300" class="w-full aspect-square object-cover">
-                </div>
-                <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
-                    <button class="like-btn flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition" onclick="toggleLike(this)">
-                        <i class="far fa-heart"></i> <span class="text-sm">128</span>
-                    </button>
-                    <button class="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition">
-                        <i class="far fa-comment"></i> <span class="text-sm">32</span>
-                    </button>
-                    <button class="flex items-center gap-1.5 text-gray-500 hover:text-green-500 transition">
-                        <i class="far fa-share-square"></i> <span class="text-sm">8</span>
-                    </button>
-                </div>
-            </article>
-
-            <!-- 动态2 -->
-            <article class="post-card bg-white rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=bob" class="w-11 h-11 rounded-full">
-                        <div>
-                            <h3 class="font-semibold text-gray-800">陈阿杰</h3>
-                            <p class="text-xs text-gray-400">4小时前</p>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-gray-600"><i class="fas fa-ellipsis-h"></i></button>
-                </div>
-                <p class="mt-3 text-gray-700 leading-relaxed">终于完成了这个月的健身目标！坚持就是胜利，感觉整个人都充满了能量。</p>
-                <div class="mt-3 rounded-xl overflow-hidden">
-                    <img src="https://picsum.photos/seed/gym/600/340" class="w-full aspect-video object-cover">
-                </div>
-                <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
-                    <button class="like-btn flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition" onclick="toggleLike(this)">
-                        <i class="far fa-heart"></i> <span class="text-sm">256</span>
-                    </button>
-                    <button class="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition">
-                        <i class="far fa-comment"></i> <span class="text-sm">45</span>
-                    </button>
-                    <button class="flex items-center gap-1.5 text-gray-500 hover:text-green-500 transition">
-                        <i class="far fa-share-square"></i> <span class="text-sm">12</span>
-                    </button>
-                </div>
-            </article>
-
-            <!-- 动态3 -->
-            <article class="post-card bg-white rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=carol" class="w-11 h-11 rounded-full">
-                        <div>
-                            <h3 class="font-semibold text-gray-800">王晓雯</h3>
-                            <p class="text-xs text-gray-400">昨天 · 北京</p>
-                        </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-gray-600"><i class="fas fa-ellipsis-h"></i></button>
-                </div>
-                <p class="mt-3 text-gray-700 leading-relaxed">分享一首最近单曲循环的歌，旋律太治愈了，推荐给所有人！</p>
-                <div class="mt-3 bg-gray-50 rounded-xl p-3 flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white">
-                        <i class="fas fa-music"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-medium text-gray-800 text-sm">夜空中最亮的星</p>
-                        <p class="text-xs text-gray-500">逃跑计划</p>
-                    </div>
-                    <button class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600">
-                        <i class="fas fa-play text-xs"></i>
-                    </button>
-                </div>
-                <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
-                    <button class="like-btn flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition" onclick="toggleLike(this)">
-                        <i class="far fa-heart"></i> <span class="text-sm">89</span>
-                    </button>
-                    <button class="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition">
-                        <i class="far fa-comment"></i> <span class="text-sm">18</span>
-                    </button>
-                    <button class="flex items-center gap-1.5 text-gray-500 hover:text-green-500 transition">
-                        <i class="far fa-share-square"></i> <span class="text-sm">5</span>
-                    </button>
-                </div>
-            </article>
-        </div>
+        <div id="feed-list" class="mt-3 space-y-3 mx-2"></div>
 
         <!-- 加载更多 -->
         <div class="text-center py-6">
-            <p class="text-gray-400 text-sm">没有更多动态了</p>
+            <p class="text-gray-400 text-sm" id="feed-end">没有更多动态了</p>
         </div>
     </main>
 
     <!-- 底部导航 -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 z-40">
         <div class="max-w-2xl mx-auto flex justify-around items-center py-2">
             <a href="index.html" class="flex flex-col items-center gap-0.5 text-blue-600">
                 <i class="fas fa-compass text-xl"></i>
@@ -229,21 +122,308 @@
         </div>
     </nav>
 
+    <!-- 发布动态模态框 -->
+    <div id="post-modal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+        <div class="modal-overlay absolute inset-0 bg-black/50" onclick="closePostModal()"></div>
+        <div class="modal-content relative bg-white w-full sm:w-[500px] sm:rounded-2xl rounded-t-2xl max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <h3 class="font-semibold text-gray-800">发布动态</h3>
+                <button onclick="closePostModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5">
+                <textarea id="post-text" placeholder="分享你的新鲜事..." class="w-full h-24 resize-none outline-none text-gray-700 placeholder-gray-400 text-base"></textarea>
+                <div id="image-preview" class="flex gap-2 flex-wrap mt-3"></div>
+                <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100">
+                    <button onclick="document.getElementById('file-input').click()" class="flex items-center gap-2 text-gray-500 hover:text-green-500 transition">
+                        <i class="fas fa-image text-lg"></i> <span class="text-sm">图片</span>
+                    </button>
+                    <button onclick="addLocation()" class="flex items-center gap-2 text-gray-500 hover:text-orange-500 transition">
+                        <i class="fas fa-map-marker-alt text-lg"></i> <span class="text-sm">位置</span>
+                    </button>
+                    <input type="file" id="file-input" accept="image/*" multiple class="hidden" onchange="previewImages(event)">
+                </div>
+                <p id="location-tag" class="hidden mt-2 text-sm text-orange-500"><i class="fas fa-map-marker-alt mr-1"></i><span id="location-text"></span></p>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+                <button onclick="publishPost()" class="w-full py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed" id="publish-btn">
+                    发布
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 故事查看模态框 -->
+    <div id="story-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+        <button onclick="closeStory()" class="absolute top-4 right-4 text-white/70 hover:text-white z-10">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+        <div class="text-center">
+            <img id="story-img" src="" class="max-w-[90vw] max-h-[70vh] rounded-xl object-contain">
+            <p id="story-name" class="text-white mt-4 font-medium"></p>
+        </div>
+    </div>
+
     <script>
-        function toggleLike(btn) {
+        // ========== 数据 ==========
+        const stories = [
+            { seed: 'alice', name: '小雨', viewed: false },
+            { seed: 'bob', name: '阿杰', viewed: false },
+            { seed: 'carol', name: '晓雯', viewed: true },
+            { seed: 'david', name: '大雄', viewed: true }
+        ];
+        let posts = [
+            {
+                id: 1, user: '林小雨', seed: 'alice', time: '2小时前', location: '上海',
+                content: '周末去看了樱花，真的太美了！春天的气息扑面而来，忍不住拍了好多照片。大家周末都去哪儿玩了？',
+                images: ['https://picsum.photos/seed/sakura1/300/300', 'https://picsum.photos/seed/sakura2/300/300', 'https://picsum.photos/seed/sakura3/300/300'],
+                likes: 128, liked: false, comments: 32, shares: 8,
+                commentList: [{user:'陈阿杰',text:'好漂亮！'},{user:'王晓雯',text:'羡慕了'}]
+            },
+            {
+                id: 2, user: '陈阿杰', seed: 'bob', time: '4小时前', location: '',
+                content: '终于完成了这个月的健身目标！坚持就是胜利，感觉整个人都充满了能量。',
+                images: ['https://picsum.photos/seed/gym/600/340'],
+                likes: 256, liked: false, comments: 45, shares: 12,
+                commentList: [{user:'林小雨',text:'太厉害了！'},{user:'李大雄',text:'一起加油'}]
+            },
+            {
+                id: 3, user: '王晓雯', seed: 'carol', time: '昨天', location: '北京',
+                content: '分享一首最近单曲循环的歌，旋律太治愈了，推荐给所有人！',
+                images: [], music: { title: '夜空中最亮的星', artist: '逃跑计划' },
+                likes: 89, liked: false, comments: 18, shares: 5,
+                commentList: [{user:'林小雨',text:'我也超喜欢这首'}]
+            }
+        ];
+        let selectedImages = [];
+        let currentLocation = '';
+
+        // ========== 初始化故事栏 ==========
+        function initStories() {
+            const list = document.getElementById('story-list');
+            stories.forEach(s => {
+                const ringClass = s.viewed ? 'story-ring-viewed' : 'story-ring';
+                const nameColor = s.viewed ? 'text-gray-500' : 'text-gray-600';
+                const div = document.createElement('div');
+                div.className = 'flex-shrink-0 text-center cursor-pointer';
+                div.onclick = () => openStory(s.seed, s.name);
+                div.innerHTML = `
+                    <div class="${ringClass} w-16 h-16 mx-auto">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${s.seed}" class="w-full h-full rounded-full object-cover border-2 border-white">
+                    </div>
+                    <p class="text-xs ${nameColor} mt-1">${s.name}</p>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // ========== 初始化动态列表 ==========
+        function renderPosts(filterText = '') {
+            const container = document.getElementById('feed-list');
+            container.innerHTML = '';
+            const filtered = posts.filter(p => p.content.includes(filterText) || p.user.includes(filterText));
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 text-gray-400">没有找到相关动态</div>';
+                return;
+            }
+            filtered.forEach(post => {
+                const likedClass = post.liked ? 'liked' : '';
+                const heartIcon = post.liked ? 'fas' : 'far';
+                let imagesHtml = '';
+                if (post.images && post.images.length > 0) {
+                    const cols = post.images.length === 1 ? 'grid-cols-1' : post.images.length === 2 ? 'grid-cols-2' : 'grid-cols-3';
+                    imagesHtml = `<div class="grid ${cols} gap-1.5 mt-3 rounded-xl overflow-hidden">` +
+                        post.images.map(img => `<img src="${img}" class="w-full aspect-square object-cover cursor-pointer hover:opacity-90 transition">`).join('') +
+                        `</div>`;
+                }
+                let musicHtml = '';
+                if (post.music) {
+                    musicHtml = `
+                        <div class="mt-3 bg-gray-50 rounded-xl p-3 flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center text-white">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-800 text-sm">${post.music.title}</p>
+                                <p class="text-xs text-gray-500">${post.music.artist}</p>
+                            </div>
+                            <button class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-600 hover:text-blue-500 transition">
+                                <i class="fas fa-play text-xs"></i>
+                            </button>
+                        </div>`;
+                }
+                let locationHtml = post.location ? `<span class="text-gray-400"> · ${post.location}</span>` : '';
+                const div = document.createElement('article');
+                div.className = 'post-card bg-white rounded-2xl p-4 shadow-sm';
+                div.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${post.seed}" class="w-11 h-11 rounded-full">
+                            <div>
+                                <h3 class="font-semibold text-gray-800">${post.user}</h3>
+                                <p class="text-xs text-gray-400">${post.time}${locationHtml}</p>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600"><i class="fas fa-ellipsis-h"></i></button>
+                    </div>
+                    <p class="mt-3 text-gray-700 leading-relaxed">${post.content}</p>
+                    ${imagesHtml}
+                    ${musicHtml}
+                    <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
+                        <button class="like-btn flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition ${likedClass}" onclick="toggleLike(${post.id},this)">
+                            <i class="${heartIcon} fa-heart"></i> <span class="text-sm">${post.likes}</span>
+                        </button>
+                        <button class="flex items-center gap-1.5 text-gray-500 hover:text-blue-500 transition" onclick="toggleComment(${post.id})">
+                            <i class="far fa-comment"></i> <span class="text-sm">${post.comments}</span>
+                        </button>
+                        <button class="flex items-center gap-1.5 text-gray-500 hover:text-green-500 transition" onclick="sharePost(${post.id})">
+                            <i class="far fa-share-square"></i> <span class="text-sm">${post.shares}</span>
+                        </button>
+                    </div>
+                    <div id="comment-box-${post.id}" class="hidden comment-box mt-3 pt-3 border-t border-gray-50">
+                        <div class="space-y-2 mb-3">
+                            ${post.commentList.map(c => `<div class="text-sm"><span class="font-medium text-gray-700">${c.user}：</span><span class="text-gray-600">${c.text}</span></div>`).join('')}
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="comment-input-${post.id}" placeholder="写评论..." class="flex-1 bg-gray-50 rounded-full px-4 py-2 text-sm outline-none">
+                            <button onclick="addComment(${post.id})" class="px-4 py-2 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 transition">发送</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // ========== 点赞 ==========
+        function toggleLike(id, btn) {
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+            post.liked = !post.liked;
+            post.likes += post.liked ? 1 : -1;
             btn.classList.toggle('liked');
             const icon = btn.querySelector('i');
             const count = btn.querySelector('span');
-            if (btn.classList.contains('liked')) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                count.textContent = parseInt(count.textContent) + 1;
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                count.textContent = parseInt(count.textContent) - 1;
+            if (post.liked) { icon.classList.remove('far'); icon.classList.add('fas'); }
+            else { icon.classList.remove('fas'); icon.classList.add('far'); }
+            count.textContent = post.likes;
+        }
+
+        // ========== 评论展开/收起 ==========
+        function toggleComment(id) {
+            const box = document.getElementById(`comment-box-${id}`);
+            box.classList.toggle('hidden');
+        }
+
+        function addComment(id) {
+            const input = document.getElementById(`comment-input-${id}`);
+            const text = input.value.trim();
+            if (!text) return;
+            const post = posts.find(p => p.id === id);
+            post.commentList.push({ user: '我', text });
+            post.comments++;
+            input.value = '';
+            renderPosts();
+        }
+
+        // ========== 分享 ==========
+        function sharePost(id) {
+            const post = posts.find(p => p.id === id);
+            post.shares++;
+            renderPosts();
+            alert('分享成功！');
+        }
+
+        // ========== 搜索 ==========
+        function toggleSearch() {
+            const bar = document.getElementById('search-bar');
+            bar.classList.toggle('hidden');
+            if (!bar.classList.contains('hidden')) {
+                document.getElementById('search-input').focus();
             }
         }
+        function doSearch(val) {
+            renderPosts(val);
+        }
+
+        // ========== 发布模态框 ==========
+        function openPostModal(type) {
+            document.getElementById('post-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            if (type === 'image') document.getElementById('file-input').click();
+        }
+        function closePostModal() {
+            document.getElementById('post-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+            document.getElementById('post-text').value = '';
+            selectedImages = [];
+            currentLocation = '';
+            document.getElementById('image-preview').innerHTML = '';
+            document.getElementById('location-tag').classList.add('hidden');
+        }
+        function previewImages(event) {
+            const files = Array.from(event.target.files);
+            const preview = document.getElementById('image-preview');
+            files.forEach(file => {
+                if (selectedImages.length >= 9) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    selectedImages.push(e.target.result);
+                    renderPreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        function renderPreview() {
+            const preview = document.getElementById('image-preview');
+            preview.innerHTML = selectedImages.map((src, i) => `
+                <div class="relative">
+                    <img src="${src}" class="preview-img">
+                    <button onclick="removeImage(${i})" class="absolute -top-1 -right-1 w-5 h-5 bg-gray-800/70 rounded-full text-white text-xs flex items-center justify-center">×</button>
+                </div>
+            `).join('');
+        }
+        function removeImage(idx) {
+            selectedImages.splice(idx, 1);
+            renderPreview();
+        }
+        function addLocation() {
+            const locs = ['上海', '北京', '杭州', '深圳', '成都'];
+            currentLocation = locs[Math.floor(Math.random() * locs.length)];
+            document.getElementById('location-text').textContent = currentLocation;
+            document.getElementById('location-tag').classList.remove('hidden');
+        }
+        function publishPost() {
+            const text = document.getElementById('post-text').value.trim();
+            if (!text && selectedImages.length === 0) {
+                alert('请输入内容或选择图片');
+                return;
+            }
+            const newPost = {
+                id: Date.now(), user: '我的昵称', seed: 'myself', time: '刚刚', location: currentLocation,
+                content: text, images: selectedImages, likes: 0, liked: false, comments: 0, shares: 0,
+                commentList: []
+            };
+            posts.unshift(newPost);
+            renderPosts();
+            closePostModal();
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ========== 故事 ==========
+        function openStory(seed, name) {
+            document.getElementById('story-img').src = `https://picsum.photos/seed/${seed}_story/400/700`;
+            document.getElementById('story-name').textContent = name + ' 的故事';
+            document.getElementById('story-modal').classList.remove('hidden');
+        }
+        function closeStory() {
+            document.getElementById('story-modal').classList.add('hidden');
+        }
+
+        // ========== 初始化 ==========
+        initStories();
+        renderPosts();
     </script>
 </body>
 </html>
